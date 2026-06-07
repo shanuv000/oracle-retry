@@ -2,11 +2,24 @@
 # Oracle Always Free Instance Auto-Retry Script (Tokyo - proshanu)
 # Features: 2-min retry, log rotation, Discord notification, reboot-safe
 
-LOG_FILE="$(dirname "$0")/retry.log"
-LOCK_FILE="$(dirname "$0")/.retry.lock"
-PID_FILE="$(dirname "$0")/retry.pid"
+DIR="$(dirname "$0")"
+LOG_FILE="${DIR}/retry.log"
+LOCK_FILE="${DIR}/.retry.lock"
+PID_FILE="${DIR}/retry.pid"
 MAX_LOG_SIZE_MB=10
-DISCORD_WEBHOOK="https://discord.com/api/webhooks/1475020333709922458/oorfq305Kz833UShQRpE3aVBl6lYzXB9YtVFqOI-5Xq5vPPI1mfWy-4YA4GkI4rZUjuP"
+
+# Load environment variables securely
+if [ -f "${DIR}/.env" ]; then
+  source "${DIR}/.env"
+else
+  echo "Error: .env file not found. Please create one containing DISCORD_WEBHOOK=\"your_url_here\""
+  exit 1
+fi
+
+if [ -z "$DISCORD_WEBHOOK" ]; then
+  echo "Error: DISCORD_WEBHOOK is not set in .env"
+  exit 1
+fi
 
 # Avoid spawning duplicate processes
 if [ -e "${LOCK_FILE}" ] && kill -0 $(cat "${LOCK_FILE}") 2>/dev/null; then
@@ -49,8 +62,7 @@ EOF
 echo "--- Starting Oracle Instance Creation Retry Script (Tokyo - proshanu) ---" >> "${LOG_FILE}"
 echo "Started at $(date '+%Y-%m-%d %H:%M:%S') | PID: $$" >> "${LOG_FILE}"
 
-# cd into the directory containing terraform files
-cd "$(dirname "$0")" || { echo "Failed to cd to script directory"; exit 1; }
+cd "${DIR}" || { echo "Failed to cd to script directory"; exit 1; }
 
 # Send startup notification
 send_discord "🔄 **OCI Retry Script Started (Tokyo - proshanu)** | PID: $$ | Interval: 2 min | $(date '+%Y-%m-%d %H:%M:%S UTC')"
@@ -93,5 +105,3 @@ while true; do
     fi
   fi
 done
-
-# Lock file removed by trap
