@@ -15,7 +15,7 @@ Oracle's Always Free Tier offers up to **4 OCPU / 24 GB RAM** on Ampere A1 ARM i
 
 | Feature | Description |
 |---|---|
-| 🔄 **Auto-Retry Loop** | Runs `terraform apply` every 2 minutes until the instance is successfully created |
+| 🔄 **Auto-Retry Loop** | Runs `terraform apply` every 45 seconds until the instance is successfully created |
 | 📢 **Discord Notifications** | Sends real-time alerts to a Discord channel on start, success, and rate-limit events |
 | 📝 **Log Rotation** | Automatically rotates logs when they exceed 10 MB to prevent disk bloat |
 | 🔒 **Lock File Protection** | Prevents duplicate script instances from running simultaneously |
@@ -41,7 +41,8 @@ oracle-retry/
 ├── .terraform/                  # Terraform provider cache (auto-generated)
 ├── terraform.tfstate            # Terraform state (auto-generated)
 ├── retry.log                    # Runtime logs (auto-generated)
-└── retry.pid                    # PID tracking file (auto-generated)
+├── retry.pid                    # PID tracking file (auto-generated)
+└── .env                         # Environment variables for webhook (you must create)
 ```
 
 ---
@@ -94,13 +95,13 @@ Also update:
 
 ### Step 4: Configure Discord Webhook *(Optional)*
 
-Edit `retry_oracle_instance.sh` and set your webhook URL:
+Create a `.env` file in the project directory and set your webhook URL:
 
 ```bash
-DISCORD_WEBHOOK="https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN"
+echo "DISCORD_WEBHOOK=\"https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN\"" > .env
 ```
 
-Set it to an empty string `""` to disable notifications.
+If you do not wish to use Discord notifications, you can leave the webhook URL blank in the `.env` file.
 
 ### Step 5: Initialize Terraform
 
@@ -114,7 +115,7 @@ terraform init
 nohup ./retry_oracle_instance.sh >> /dev/null 2>&1 &
 ```
 
-The script will now run in the background, retrying every 2 minutes.
+The script will now run in the background, retrying every 45 seconds.
 
 ---
 
@@ -131,6 +132,8 @@ Add this line:
 ```
 @reboot cd /path/to/oracle-retry && nohup ./retry_oracle_instance.sh >> /dev/null 2>&1 &
 ```
+
+Alternatively, you can set it up as a `systemd` service for more robust persistence.
 
 ---
 
@@ -230,7 +233,7 @@ availability_domain = data.oci_identity_availability_domains.ads.availability_do
 │       │        │                │
 │       ▼        ├── Rate limit → Sleep 10 min
 │   Discord      │                │
-│   Notify       └── Capacity  → Sleep 2 min
+│   Notify       └── Capacity  → Sleep 45 sec
 │   + Exit              error     │
 │                        │        │
 │                        ▼        │
