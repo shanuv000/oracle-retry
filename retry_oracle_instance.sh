@@ -95,7 +95,7 @@ while true; do
     break
   else
     # Check for rate-limiting
-    if echo "$OUTPUT" | grep -qi "429\|TooMany\|too_many_requests"; then
+    if echo "$OUTPUT" | grep -qiE "\b429\b|TooMany|too_many_requests"; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') - ⚠️ RATE LIMITED! Waiting 10 minutes..." >> "${LOG_FILE}"
       send_discord "⚠️ **Rate Limited! (Tokyo - proshanu)** Backing off for 10 minutes. Attempt #${ATTEMPT}"
       sleep 600
