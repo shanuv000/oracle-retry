@@ -1,6 +1,6 @@
 #!/bin/bash
 # Oracle Always Free Instance Auto-Retry Script (Tokyo - proshanu)
-# Features: 45-sec retry, log rotation, Discord notification, reboot-safe
+# Features: 30-sec retry, log rotation, Discord notification, reboot-safe
 
 DIR="$(dirname "$0")"
 LOG_FILE="${DIR}/retry.log"
@@ -65,7 +65,7 @@ echo "Started at $(date '+%Y-%m-%d %H:%M:%S') | PID: $$" >> "${LOG_FILE}"
 cd "${DIR}" || { echo "Failed to cd to script directory"; exit 1; }
 
 # Send startup notification
-send_discord "🔄 **OCI Retry Script Started (Tokyo - proshanu)** | PID: $$ | Interval: 45 sec | $(date '+%Y-%m-%d %H:%M:%S UTC')"
+send_discord "🔄 **OCI Retry Script Started (Tokyo - proshanu)** | PID: $$ | Interval: 30 sec | $(date '+%Y-%m-%d %H:%M:%S UTC')"
 
 ATTEMPT=0
 
@@ -100,8 +100,8 @@ while true; do
       send_discord "⚠️ **Rate Limited! (Tokyo - proshanu)** Backing off for 10 minutes. Attempt #${ATTEMPT}"
       sleep 600
     else
-      echo "$(date '+%Y-%m-%d %H:%M:%S') - FAILED: Terraform apply failed (exit code $EXIT_CODE). Retrying in 45 seconds... [Attempt #${ATTEMPT}]" >> "${LOG_FILE}"
-      sleep 45
+      echo "$(date '+%Y-%m-%d %H:%M:%S') - FAILED: Terraform apply failed (exit code $EXIT_CODE). Retrying in 30 seconds... [Attempt #${ATTEMPT}]" >> "${LOG_FILE}"
+      sleep 30
     fi
   fi
 done
